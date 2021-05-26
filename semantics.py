@@ -1,5 +1,8 @@
 """The goal in this module is to define functions associated with the semantics of formulas in propositional logic. """
 
+from formula import *
+from functions import atoms
+
 
 def truth_value(formula, interpretation):
     """Determines the truth value of a formula in an interpretation (valuation).
@@ -33,3 +36,33 @@ def is_satisfiable(formula):
     Otherwise, it returns False."""
     pass
     # ======== YOUR CODE HERE ========
+
+    list_atoms = atoms(formula)
+    interpretation = dict()
+
+    return sat(formula, list_atoms, interpretation)
+
+
+def sat(formula, list_atoms, interpretation):
+    if len(list_atoms) == 0:
+        if truth_value(formula, interpretation):
+            return interpretation
+        else:
+            return False
+
+    atom = list_atoms.pop()
+
+    list1 = list_atoms.copy()
+    list2 = list_atoms.copy()
+
+    interpretation1 = interpretation.copy()
+    interpretation1[Atom.__str__(atom)] = True
+
+    interpretation2 = interpretation.copy()
+    interpretation2[Atom.__str__(atom)] = False
+
+    result = sat(formula, list1, interpretation1)
+
+    if result:
+        return result
+    return sat(formula, list2, interpretation2)
