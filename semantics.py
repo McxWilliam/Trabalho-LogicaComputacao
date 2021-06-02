@@ -42,15 +42,49 @@ def is_valid(formula):
     # ======== YOUR CODE HERE ========
 
 
+def defined_values(formula):
+    """Auxiliary function that returns an interpretation with some defined values """
+
+    interpretation = dict()
+    list_formula = defined_list(formula)
+
+    for form in list_formula:
+        if isinstance(form, Atom):
+            interpretation[Atom.__str__(form)] = True
+        if isinstance(form, Not) and isinstance(form.inner, Atom):
+            interpretation[Atom.__str__(form.inner)] = False
+
+    return interpretation
+
+
+def defined_list(formula):
+    """Returns a list with some formulas"""
+
+    list_and = list()
+    if isinstance(formula, Atom):
+        list_and.append(formula)
+    if isinstance(formula, Not) and isinstance(formula.inner, Atom):
+        list_and.append(formula)
+    if isinstance(formula, And):
+        list_and += defined_list(formula.left)
+        list_and += defined_list(formula.right)
+
+    return list_and
+
+
 def is_satisfiable(formula):
     """Checks whether formula is satisfiable.
     In other words, if the input formula is satisfiable, it returns an interpretation that assigns true to the formula.
     Otherwise, it returns False."""
     pass
     list_atoms = atoms(formula)
-    interpretation = dict()
+    interpretation = defined_values(formula)
+
+    for k in interpretation.keys():
+        list_atoms.remove(Atom(k))
 
     return sat(formula, list_atoms, interpretation)
+
 
 def sat(formula, list_atoms, interpretation):
     if len(list_atoms) == 0:
