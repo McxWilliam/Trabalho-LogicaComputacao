@@ -7,13 +7,9 @@ atributos = ['pi<=42.09', 'pi<=48.12', 'pi<=54.92', 'pi<=63.52', 'pi<=70.62', 'p
              'ss<=29.51', 'ss<=34.38', 'ss<=39.81', 'ss<=44.44', 'ss<=50.55', 'ss<=56.31',
              'rp<=104.70', 'rp<=111.98', 'rp<=116.59', 'rp<=120.08', 'rp<=124.89', 'rp<=130.30',
              'gs<=-0.74', 'gs<=2.10', 'gs<=6.42', 'gs<=25.36', 'gs<=37.89', 'gs<=57.55']
-
 regras = 4
 
 significado = ['p', 'n', 's']
-
-
-#auxiliary functions
 
 
 def and_all(list_formulas):
@@ -43,7 +39,7 @@ def or_all(list_formulas):
     del list_formulas[0]
     for formula in list_formulas:
         first_formula = Or(first_formula, formula)
-    return first_formula
+    return first_formula;
 
 
 def restricao_um(atributos, regras, significado):
@@ -56,7 +52,23 @@ def restricao_um(atributos, regras, significado):
         or_form = or_all(list_or)
         list_and.append(or_form)
 
+
+    return and_all(list_and)
+
+
+
+def restricao_dois(atributos, regras):
+    list_and = []
+    for i in range(regras):
+        list_or = []
+        for atr in atributos:
+            list_or.append(Not(Atom('X' + atr + ',' + str(i+1) + ',' + 's')))
+
+        or_form = or_all(list_or)
+        list_and.append(or_form)
+
     return and_all(list_and)
 
 
 print(restricao_um(atributos, regras, significado))
+print(restricao_dois(atributos, regras))
