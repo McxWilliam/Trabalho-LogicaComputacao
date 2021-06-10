@@ -42,19 +42,26 @@ def or_all(list_formulas):
     return first_formula;
 
 
-def restricao_um(atributos, regras, significado):
-    list_and = []
+def restricao_um(atributos, regras):
+    list_and1 = []       #armazena todas as linhas
     for i in range(regras):
-        list_or = []
+        list_and2 = []   #armazena todos os atributos
         for atr in atributos:
-            for sig in significado:
-                list_or.append(Atom('X' + atr + ',' + str(i+1) + ',' + sig))
-        or_form = or_all(list_or)
-        list_and.append(or_form)
-
-
-    return and_all(list_and)
-
+            list_or = [] #armazena todas as possibilidades
+            for j in range(1, 4):
+                if j == 1:
+                    list_or.append(And(And(Atom('X' + atr + ',' + str(i+1) + ',' + 'p'), Not(Atom('X' + atr + ',' + str(i+1) + ',' + 'n'))),
+                                       Not(Atom('X' + atr + ',' + str(i+1) + ',' + 's'))))
+                if j == 2:
+                    list_or.append(And(And(Not(Atom('X' + atr + ',' + str(i + 1) + ',' + 'p')), Atom('X' + atr + ',' + str(i + 1) + ',' + 'n')),
+                                       Not(Atom('X' + atr + ',' + str(i + 1) + ',' + 's'))))
+                if j == 3:
+                    list_or.append(And(And(Not(Atom('X' + atr + ',' + str(i + 1) + ',' + 'p')), Not(Atom('X' + atr + ',' + str(i + 1) + ',' + 'n'))),
+                                       Atom('X' + atr + ',' + str(i + 1) + ',' + 's')))
+            or_form = or_all(list_or)
+            list_and2.append(or_form)
+        list_and1.append(and_all(list_and2))
+    return and_all(list_and1)
 
 
 def restricao_dois(atributos, regras):
@@ -70,5 +77,5 @@ def restricao_dois(atributos, regras):
     return and_all(list_and)
 
 
-print(restricao_um(atributos, regras, significado))
+print(restricao_um(atributos, regras))
 print(restricao_dois(atributos, regras))
