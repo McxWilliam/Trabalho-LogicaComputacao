@@ -12,15 +12,15 @@ regras = 4
 
 significado = ['p', 'n', 's']
 
-def lerArquivo(caminho):
+
+def lerarquivo(caminho):
     lista = []
     with open(caminho, 'r') as entrada:
         arquivo = csv.reader(entrada)
-        #next(arquivo)      #pula a linha de cabeçalho
+        #next(arquivo)
         for linha in arquivo:
             lista.append(linha)
     return lista
-
 
 def and_all(list_formulas):
     """
@@ -49,30 +49,31 @@ def or_all(list_formulas):
     del list_formulas[0]
     for formula in list_formulas:
         first_formula = Or(first_formula, formula)
+
     return first_formula;
 
 
 def restricao_um(atributos, regras):
-    list_and1 = []       #armazena todas as linhas
-    for i in range(regras):
-        list_and2 = []   #armazena todos os atributos
+    list_and1 = []
+    for p in range(regras):
+        list_and2 = []
         for atr in atributos:
-            list_or = [] #armazena todas as possibilidades
-            for j in range(1, 4):
-                if j == 1:
-                    list_or.append(And(And(Atom('X' + atr + ',' + str(i+1) + ',' + 'p'), Not(Atom('X' + atr + ',' + str(i+1) + ',' + 'n'))),
-                                       Not(Atom('X' + atr + ',' + str(i+1) + ',' + 's'))))
-                if j == 2:
-                    list_or.append(And(And(Not(Atom('X' + atr + ',' + str(i + 1) + ',' + 'p')), Atom('X' + atr + ',' + str(i + 1) + ',' + 'n')),
-                                       Not(Atom('X' + atr + ',' + str(i + 1) + ',' + 's'))))
-                if j == 3:
-                    list_or.append(And(And(Not(Atom('X' + atr + ',' + str(i + 1) + ',' + 'p')), Not(Atom('X' + atr + ',' + str(i + 1) + ',' + 'n'))),
-                                       Atom('X' + atr + ',' + str(i + 1) + ',' + 's')))
+            list_or = []
+            for r in range(1, 4):
+                if r == 1:
+                    list_or.append(And(And(Atom('X' + atr + ',' + str(r + 1) + ',' + 'p'), Not(Atom('X' + atr + ',' + str(r + 1) + ',' + 'n'))),
+                                        Not(Atom('X' + atr + ',' + str(r + 1) + 's'))))
+                if r == 2:
+                    list_or.append(And(And(Not(Atom('X' + atr + ',' + str(r + 1) + ',' + 'p')), Atom('X' + atr + ',' + str(r + 1) + ',' + 'n')),
+                                               Not(Atom('X' + atr + ',' + str(r + 1) + 's'))))
+                if r == 3:
+                    list_or.append(And(And(Not(Atom('X' + atr + ',' + str(r + 1) + ',' + 'p')), Atom('X' + atr + ',' + str(r + 1) + ',' + 'n')),
+                                               Not(Atom('X' + atr + ',' + str(r + 1) + 's'))))
             or_form = or_all(list_or)
             list_and2.append(or_form)
         list_and1.append(and_all(list_and2))
-    return and_all(list_and1)
 
+    return and_all(list_and1)
 
 def restricao_dois(atributos, regras):
     list_and = []
@@ -87,18 +88,19 @@ def restricao_dois(atributos, regras):
     return and_all(list_and)
 
 def restricao_tres(atributos, regras):
-    dados = lerArquivo('arquivos/column_bin.csv')
+    datas = lerarquivo('arquivos/column_bin.csv')
     list_and1 = []
-    for linha in dados:
+    for linha in datas:
         if linha[36] == '0':
             list_and2 = []
             for r in range(regras):
                 list_or = []
                 for i in range(36):
                     if linha[i] == '0':
-                        list_or.append(Atom('X' + atributos[i] + ',' + str(r+1) + ',' + 'p'))
+                        list_or.append(Atom('X' + atributos[i] + ',' + str(r + 1) + ',' + 'p'))
                     elif linha[i] == '1':
-                        list_or.append(Atom('X' + atributos[i] + ',' + str(r+1) + ',' + 'n'))
+                        list_or.append(Atom('X' + atributos[i] + ',' + str(r + 1) + ',' + 'n'))
+
 
                 or_form = or_all(list_or)
                 list_and2.append(or_form)
@@ -106,30 +108,50 @@ def restricao_tres(atributos, regras):
             list_and1.append(and_form)
     return and_all(list_and1)
 
-
 def restricao_quatro(atributos, regras):
-    dados = lerArquivo('arquivos/column_bin.csv')
+    datas = lerarquivo('arquivos/column_bin.csv')
     list_and = []
     for r in range(regras):
         enfermo = 0
-        for paciente in dados:
-            list_implies = []
-            if paciente[36] == '1':
-                enfermo += 1
-                for j in range(36):
-                    if paciente[j] == '0':
-                        list_implies.append(Implies(Atom('X' + atributos[j] + ',' + str(r+1) + ',' + 'p'),
-                                                    Not(Atom('C' + str(r+1) + ',' + str(enfermo)))))
-                    elif paciente[j] == '1':
-                        list_implies.append(Implies(Atom('X' + atributos[j] + ',' + str(r + 1) + ',' + 'n'),
-                                                    Not(Atom('C' + str(r + 1) + ',' + str(enfermo)))))
-                and_form = and_all(list_implies)
-                list_and.append(and_form)
+        for paciente in datas:
+            for r in range(regras):
+                list_implies = []
+                if paciente[36] == '1':
+                    enfermo += 1
+                    for j in range(36):
+                        if paciente[j] == '0':
+                            list_implies.append(Implies(Atom('X' + atributos[j] + ',' + str(r + 1) + ',' + 'p'),
+                                                      Not(Atom('C' + str(r + 1) + ',' + str(enfermo)))))
+                        elif paciente[j] == '1':
+                            list_implies.append(Implies(Atom('X' + atributos[j] + ',' + str(r + 1) + ',' + 'n'),
+                                                      Not(Atom('C' + str(r + 1) + ',' + str(enfermo)))))
+
+                    and_form = and_all(list_implies)
+                    list_and.append(and_form)
+    return and_all(list_and)
+
+def restricao_cinco(regras):
+    datas = lerarquivo('arquivos/column_bin.csv')
+    list_and = []
+    enfermo = 0
+    for paciente in datas:
+        if paciente[36] == '1':
+            enfermo += 1
+            list_or = []
+            for i in range(regras):
+                list_or.append(Atom('C' + str(i + 1) + ',' + str(enfermo)))
+
+            or_form = or_all(list_or)
+            list_and.append(or_form)
+
     return and_all(list_and)
 
 
 
-#print(restricao_um(atributos, regras))
-#print(restricao_dois(atributos, regras))
-#print(restricao_tres(atributos, regras))
-print(restricao_quatro(atributos, regras))
+
+
+
+
+
+
+
