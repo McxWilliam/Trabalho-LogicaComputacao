@@ -107,6 +107,29 @@ def restricao_tres(atributos, regras):
     return and_all(list_and1)
 
 
+def restricao_quatro(atributos, regras):
+    dados = lerArquivo('arquivos/column_bin.csv')
+    list_and = []
+    for r in range(regras):
+        enfermo = 0
+        for paciente in dados:
+            list_implies = []
+            if paciente[36] == '1':
+                enfermo += 1
+                for j in range(36):
+                    if paciente[j] == '0':
+                        list_implies.append(Implies(Atom('X' + atributos[j] + ',' + str(r+1) + ',' + 'p'),
+                                                    Not(Atom('C' + str(r+1) + ',' + str(enfermo)))))
+                    elif paciente[j] == '1':
+                        list_implies.append(Implies(Atom('X' + atributos[j] + ',' + str(r + 1) + ',' + 'n'),
+                                                    Not(Atom('C' + str(r + 1) + ',' + str(enfermo)))))
+                and_form = and_all(list_implies)
+                list_and.append(and_form)
+    return and_all(list_and)
+
+
+
 #print(restricao_um(atributos, regras))
 #print(restricao_dois(atributos, regras))
-print(restricao_tres(atributos, regras))
+#print(restricao_tres(atributos, regras))
+print(restricao_quatro(atributos, regras))
