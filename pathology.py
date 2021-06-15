@@ -1,5 +1,6 @@
 from semantics import *
 from formula import *
+import csv
 
 atributos = ['pi<=42.09', 'pi<=48.12', 'pi<=54.92', 'pi<=63.52', 'pi<=70.62', 'pi<=80.61',
              'pt<=8.31', 'pt<=12.36', 'pt<=14.55', 'pt<=17.44', 'pt<=21.06', 'pt<=28.8',
@@ -10,6 +11,15 @@ atributos = ['pi<=42.09', 'pi<=48.12', 'pi<=54.92', 'pi<=63.52', 'pi<=70.62', 'p
 regras = 4
 
 significado = ['p', 'n', 's']
+
+def lerArquivo(caminho):
+    lista = []
+    with open(caminho, 'r') as entrada:
+        arquivo = csv.reader(entrada)
+        #next(arquivo)      #pula a linha de cabeçalho
+        for linha in arquivo:
+            lista.append(linha)
+    return lista
 
 
 def and_all(list_formulas):
@@ -76,6 +86,27 @@ def restricao_dois(atributos, regras):
 
     return and_all(list_and)
 
+def restricao_tres(atributos, regras):
+    dados = lerArquivo('arquivos/column_bin.csv')
+    list_and1 = []
+    for linha in dados:
+        if linha[36] == '0':
+            list_and2 = []
+            for r in range(regras):
+                list_or = []
+                for i in range(36):
+                    if linha[i] == '0':
+                        list_or.append(Atom('X' + atributos[i] + ',' + str(r+1) + ',' + 'p'))
+                    elif linha[i] == '1':
+                        list_or.append(Atom('X' + atributos[i] + ',' + str(r+1) + ',' + 'n'))
 
-print(restricao_um(atributos, regras))
-print(restricao_dois(atributos, regras))
+                or_form = or_all(list_or)
+                list_and2.append(or_form)
+            and_form = and_all(list_and2)
+            list_and1.append(and_form)
+    return and_all(list_and1)
+
+
+#print(restricao_um(atributos, regras))
+#print(restricao_dois(atributos, regras))
+print(restricao_tres(atributos, regras))
