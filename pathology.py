@@ -4,6 +4,7 @@ from formula import *
 import csv
 
 sys.setrecursionlimit(2000)
+
 """atributos = ['pi<=42.09', 'pi<=48.12', 'pi<=54.92', 'pi<=63.52', 'pi<=70.62', 'pi<=80.61',
              'pt<=8.31', 'pt<=12.36', 'pt<=14.55', 'pt<=17.44', 'pt<=21.06', 'pt<=28.8',
              'la<=32.59', 'la<=39.63', 'la<=46.33', 'la<=52.68', 'la<=61.27', 'la<=74.10',
@@ -71,8 +72,8 @@ def restricao_um(atributos, regras):
                     list_or.append(And(And(Not(Atom('X' + atr + ',' + str(r + 1) + ',' + 'p')), Atom('X' + atr + ',' + str(r + 1) + ',' + 'n')),
                                                Not(Atom('X' + atr + ',' + str(r + 1) + ',' + 's'))))
                 if r == 3:
-                    list_or.append(And(And(Not(Atom('X' + atr + ',' + str(r + 1) + ',' + 'p')), Atom('X' + atr + ',' + str(r + 1) + ',' + 'n')),
-                                               Not(Atom('X' + atr + ',' + str(r + 1) + ',' + 's'))))
+                    list_or.append(And(And(Not(Atom('X' + atr + ',' + str(r + 1) + ',' + 'p')), Not(Atom('X' + atr + ',' + str(r + 1) + ',' + 'n'))),
+                                               Atom('X' + atr + ',' + str(r + 1) + ',' + 's')))
             or_form = or_all(list_or)
             list_and2.append(or_form)
         list_and1.append(and_all(list_and2))
@@ -168,9 +169,10 @@ def pathology_solution(atributos, regras):
     else:
         print("Insatisfatível")
 
-pathology_solution(atributos, regras)
+#pathology_solution(atributos, regras)
 
 
+print(restricao_um(atributos, regras))
 
 
 
