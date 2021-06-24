@@ -185,6 +185,49 @@ def defined_attribute(solution):
             list_atoms.append(k)
     return make_rules(list_atoms)
 
+def make_rules(list_atomicas):
+    rules = []
+    atomicas = []
+    for atom in list_atomicas:
+        atomicas.append(atom.split(','))
+    for r in range(1, regras + 1):
+        rule = []
+        for atom in atomicas:
+            if len(atom) > 2 and atom[1] == str(r):
+                if atom[2] == 'p':
+                    rule.append(Atom(atom[0]))
+                elif atom[2] == 'n':
+                    rule.append(Not(Atom(atom[0])))
+        rules.append(and_all(rule))
+
+    return rules
+
+
+def porcentege_of_correct_answers(rules):
+    dados = lerarquivo('arquivos/column_bin_test_compacto.csv')
+    count = 0
+    for paciente in dados:
+        atendido = False
+        interpretation = dict()
+        for i in range(len(paciente) - 1):
+            if paciente[i] == '0':
+                interpretation['X' + atributos[i]] = False
+            elif paciente[i] == '1':
+                interpretation['X' + atributos[i]] = True
+        #print(interpretation)
+
+        for rule in rules:
+            if truth_value(rule, interpretation):
+                if paciente[len(paciente) - 1] == '1':
+                    count += 1
+                    atendido = True
+                elif paciente[len(paciente) - 1] == '0':
+                    atendido = True
+        if (not atendido) and paciente[len(paciente) - 1] == '0':
+            count += 1
+    return (count/len(dados))*100
+
+
 pathology_solution(atributos, regras)
 
 
