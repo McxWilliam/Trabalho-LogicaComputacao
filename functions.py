@@ -86,7 +86,15 @@ def number_of_connectives(formula):
 
 def is_literal(formula):
     """Returns True if formula is a literal. It returns False, otherwise"""
-    pass  # ======== REMOVE THIS LINE AND INSERT YOUR CODE HERE ========
+    # ======== REMOVE THIS LINE AND INSERT YOUR CODE HERE ========
+    if isinstance(formula, Atom):
+        return True
+
+    if isinstance(formula, Not):
+        return is_literal(formula.inner)
+
+    return False
+
 
 
 def substitution(formula, old_subformula, new_subformula):
@@ -127,3 +135,60 @@ def is_decomposable_negation_normal_form(formula):
     """Returns True if formula is in decomposable negation normal form.
     Returns False, otherwise."""
     pass  # ======== REMOVE THIS LINE AND INSERT YOUR CODE HERE ========
+
+
+def implication_free(formula):
+    if isinstance(formula, Implies):
+        b1 = implication_free(formula.left)
+        b2 = implication_free(formula.right)
+        return Or(Not(b1), b2)
+
+    if isinstance(formula, And):
+        b1 = implication_free(formula.left)
+        b2 = implication_free(formula.right)
+        return And(b1, b2)
+
+    if isinstance(formula, Or):
+        b1 = implication_free(formula.left)
+        b2 = implication_free(formula.right)
+        return Or(b1, b2)
+
+    if isinstance(formula, Not):
+        b1 = implication_free(formula.inner)
+        return Not(b1)
+
+    if isinstance(formula, Atom):
+        return formula
+
+
+def distributive(formula):
+    if is_literal(formula):
+        return formula
+
+    if isinstance(formula, And):
+        b1 = distributive(formula.left)
+        b2 = distributive(formula.right)
+        return And(b1, b2)
+
+    if isinstance(formula, Or):
+        b1 = distributive(formula.left)
+        b2 = distributive(formula.right)
+
+        if isinstance(b1, And):
+            """c1 = b1.left
+            c2 = b1.right
+            """
+            c1 = distributive(b1.left)
+            c2 = distributive(b1.right)
+
+            return And(distributive(Or(c1, b2)), distributive(Or(c2, b2)))
+
+        if isinstance(b2, And):
+            """c1 = b2.left
+            c2 = b2.right
+            """
+            c1 = distributive(b2.left)
+            c2 = distributive(b2.right)
+            return And(distributive(Or(b1, c1)), distributive(Or(b1, c2)))
+
+    return Or(b1, b2)
