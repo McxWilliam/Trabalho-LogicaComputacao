@@ -137,6 +137,13 @@ def is_decomposable_negation_normal_form(formula):
     pass  # ======== REMOVE THIS LINE AND INSERT YOUR CODE HERE ========
 
 
+def cnf(formula):
+    b = implication_free(formula)
+    b = negation_normal_form(b)
+    b = distributive(b)
+    return b
+
+
 def implication_free(formula):
     if isinstance(formula, Implies):
         b1 = implication_free(formula.left)
@@ -159,6 +166,38 @@ def implication_free(formula):
 
     if isinstance(formula, Atom):
         return formula
+
+
+def negation_normal_form(formula):
+    if is_literal(formula):
+        return formula
+
+    if isinstance(formula, Not):
+        b1 = formula.inner
+        if isinstance(b1, Not):
+            return negation_normal_form(b1.inner)
+
+    if isinstance(formula, And):
+        b1 = negation_normal_form(formula.left)
+        b2 = negation_normal_form(formula.right)
+        return And(b1, b2)
+
+    if isinstance(formula, Or):
+        b1 = negation_normal_form(formula.left)
+        b2 = negation_normal_form(formula.right)
+        return Or(b1, b2)
+
+    if isinstance(formula, Not) and isinstance(formula.inner, And):
+        a = formula.inner
+        b1 = negation_normal_form(Not(a.left))
+        b2 = negation_normal_form(Not(a.right))
+        return Or(b1, b2)
+
+    if isinstance(formula, Not) and isinstance(formula.inner, Or):
+        a = formula.inner
+        b1 = negation_normal_form(Not(a.left))
+        b2 = negation_normal_form(Not(a.right))
+        return And(b1, b2)
 
 
 def distributive(formula):
