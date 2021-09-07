@@ -204,6 +204,7 @@ def dpll_solution(formula):
     else:
         print("Insatisfatível")
 
+
 def pysat_solution(formula):
     tseitin_form = tseitin(formula)
     form_clausal = formula_in_clauses(tseitin_form)
@@ -219,6 +220,7 @@ def pysat_solution(formula):
     interpretation = mapping_integers_atoms(array_integer, model)
 
     if solver.solve():
+        print(model)
         print(interpretation)
         rules = defined_attribute(interpretation)
         print("--Regras--")
@@ -228,6 +230,7 @@ def pysat_solution(formula):
         print(f"Taxa de acerto - {taxa_acerto}%")
     else:
         print("Insatisfatível")
+
 
 def mapping_atoms_integers(tseitin_form, form_clausal):
     atomicas = atoms(tseitin_form)
@@ -249,7 +252,9 @@ def mapping_atoms_integers(tseitin_form, form_clausal):
                 inteiro = array_integer[literal.__str__()]
                 clause.append(inteiro * (-1))
         all_clauses.append(clause)
+
     return array_integer, all_clauses
+
 
 def mapping_integers_atoms(array_integer, model):
     interpretation = {}
@@ -262,7 +267,6 @@ def mapping_integers_atoms(array_integer, model):
         elif elem < 0:
             position = list_of_value.index(elem * (-1))
             interpretation[Not(list_of_key[position]).__str__()] = True
-
     return interpretation
 
 
@@ -318,6 +322,7 @@ def porcentege_of_correct_answers(rules):
 
 
 formula_final = create_final_formula(atributos, regras)
+
 
 #testando força bruta
 
