@@ -4,6 +4,7 @@ from functions import *
 from semantics import truth_value
 import csv
 import time
+from pysat.solvers import Glucose3
 
 """
 atributos = ['pi<=42.09', 'pi<=48.12', 'pi<=54.92', 'pi<=63.52', 'pi<=70.62', 'pi<=80.61',
@@ -168,11 +169,9 @@ def create_final_formula(atributos, regras):
     return final_formula
 
 
-def pathology_solution(atributos, regras):
+def pathology_solution(formula):
 
-    final_formula = create_final_formula(atributos, regras)
-
-    solution = is_satisfiable(final_formula)
+    solution = is_satisfiable(formula)
 
     if solution:
         print(solution)
@@ -185,12 +184,11 @@ def pathology_solution(atributos, regras):
     else:
         print("Insatisfatível")
 
-    return final_formula
+    return formula
 
 
-def dpll_solution(atributos, regras):
-    final_formula = create_final_formula(atributos, regras)
-    tseitin_form = tseitin(final_formula)
+def dpll_solution(formula):
+    tseitin_form = tseitin(formula)
     form_clausal = formula_in_clauses(tseitin_form)
 
     interpretation = dpll(form_clausal)
@@ -205,6 +203,70 @@ def dpll_solution(atributos, regras):
         print(f"Taxa de acerto - {taxa_acerto}%")
     else:
         print("Insatisfatível")
+
+
+def pysat_solution(formula):
+    tseitin_form = tseitin(formula)
+    form_clausal = formula_in_clauses(tseitin_form)
+
+    array_integer, all_clauses = mapping_atoms_integers(tseitin_form, form_clausal)
+
+    solver = Glucose3()
+    for clausula in all_clauses:
+        solver.add_clause(clausula)
+    solver.solve()
+    model = solver.get_model()
+
+    interpretation = mapping_integers_atoms(array_integer, model)
+
+    if solver.solve():
+        print(interpretation)
+        rules = defined_attribute(interpretation)
+        print("--Regras--")
+        for rule in rules:
+            print(rule)
+        taxa_acerto = porcentege_of_correct_answers(rules)
+        print(f"Taxa de acerto - {taxa_acerto}%")
+    else:
+        print("Insatisfatível")
+
+
+def mapping_atoms_integers(tseitin_form, form_clausal):
+    atomicas = atoms(tseitin_form)
+    array_integer = {}
+    cont = 0
+    for atom in atomicas:
+        cont += 1
+        array_integer[atom.__str__()] = cont
+
+    all_clauses = []
+    for clausula in form_clausal:
+        clause = []
+        for literal in clausula:
+            if isinstance(literal, Atom):
+                clause.append(array_integer[literal.__str__()])
+            elif isinstance(literal, Not):
+                while isinstance(literal, Not):
+                    literal = literal.inner
+                inteiro = array_integer[literal.__str__()]
+                clause.append(inteiro * (-1))
+        all_clauses.append(clause)
+
+    return array_integer, all_clauses
+
+
+def mapping_integers_atoms(array_integer, model):
+    interpretation = {}
+    list_of_key = list(array_integer.keys())
+    list_of_value = list(array_integer.values())
+    for elem in model:
+        if elem > 0:
+            position = list_of_value.index(elem)
+            interpretation[list_of_key[position]] = True
+        elif elem < 0:
+            position = list_of_value.index(elem * (-1))
+            interpretation[Not(list_of_key[position]).__str__()] = True
+    return interpretation
 
 
 def defined_attribute(solution):
@@ -258,18 +320,14 @@ def porcentege_of_correct_answers(rules):
     return (count/len(dados))*100
 
 
-#print(restricao_um(atributos, regras))
-#print(restricao_dois(atributos, regras))
-#print(restricao_tres(atributos, regras))
-#print(restricao_quatro(atributos, regras))
-#print(restricao_cinco(regras))
+formula_final = create_final_formula(atributos, regras)
 
 
 #testando força bruta
 
 start_time = time.time()
 print('Solution satisfiability brute force:')
-pathology_solution(atributos, regras)
+pathology_solution(formula_final)
 end_time = time.time()
 print("Time: {:.2f}".format(end_time-start_time))
 
@@ -278,6 +336,15 @@ print("Time: {:.2f}".format(end_time-start_time))
 
 start_time = time.time()
 print('\nSolution DPLL:')
-dpll_solution(atributos, regras)
+dpll_solution(formula_final)
+end_time = time.time()
+print("Time: {:.2f}".format(end_time - start_time))
+
+
+#testando solver
+
+start_time = time.time()
+print('\nSolution PySat:')
+pysat_solution(formula_final)
 end_time = time.time()
 print("Time: {:.2f}".format(end_time - start_time))
